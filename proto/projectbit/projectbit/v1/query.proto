@@ -1,4 +1,5 @@
 syntax = "proto3";
+
 package projectbit.projectbit.v1;
 
 import "amino/amino.proto";
@@ -6,6 +7,7 @@ import "cosmos/base/query/v1beta1/pagination.proto";
 import "gogoproto/gogo.proto";
 import "google/api/annotations.proto";
 import "projectbit/projectbit/v1/params.proto";
+import "projectbit/projectbit/v1/post.proto";
 
 option go_package = "projectBit/x/projectbit/types";
 
@@ -14,6 +16,21 @@ service Query {
   // Parameters queries the parameters of the module.
   rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
     option (google.api.http).get = "/projectBit/projectbit/v1/params";
+  }
+
+  // ListPost Queries a list of Post items.
+  rpc GetPost(QueryGetPostRequest) returns (QueryGetPostResponse) {
+    option (google.api.http).get = "/projectBit/projectbit/v1/post/{id}";
+  }
+
+  // ListPost defines the ListPost RPC.
+  rpc ListPost(QueryAllPostRequest) returns (QueryAllPostResponse) {
+    option (google.api.http).get = "/projectBit/projectbit/v1/post";
+  }
+
+  // SayHello Queries a list of SayHello items.
+  rpc SayHello(QuerySayHelloRequest) returns (QuerySayHelloResponse) {
+    option (google.api.http).get = "/projectBit/projectbit/v1/say_hello/{name}";
   }
 }
 
@@ -27,4 +44,35 @@ message QueryParamsResponse {
     (gogoproto.nullable) = false,
     (amino.dont_omitempty) = true
   ];
+}
+
+// QueryGetPostRequest defines the QueryGetPostRequest message.
+message QueryGetPostRequest {
+  uint64 id = 1;
+}
+
+// QueryGetPostResponse defines the QueryGetPostResponse message.
+message QueryGetPostResponse {
+  Post post = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryAllPostRequest defines the QueryAllPostRequest message.
+message QueryAllPostRequest {
+  cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+// QueryAllPostResponse defines the QueryAllPostResponse message.
+message QueryAllPostResponse {
+  repeated Post post = 1 [(gogoproto.nullable) = false];
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
+}
+
+// QuerySayHelloRequest defines the QuerySayHelloRequest message.
+message QuerySayHelloRequest {
+  string name = 1;
+}
+
+// QuerySayHelloResponse defines the QuerySayHelloResponse message.
+message QuerySayHelloResponse {
+  string name = 1;
 }

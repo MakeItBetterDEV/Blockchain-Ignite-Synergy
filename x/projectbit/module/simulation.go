@@ -1,9 +1,14 @@
 package projectbit
 
 import (
+	"math/rand"
+
 	"github.com/cosmos/cosmos-sdk/types/module"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
+	"github.com/cosmos/cosmos-sdk/x/simulation"
 
+	"projectBit/testutil/sample"
+	projectbitsimulation "projectBit/x/projectbit/simulation"
 	"projectBit/x/projectbit/types"
 )
 
@@ -14,7 +19,8 @@ func (AppModule) GenerateGenesisState(simState *module.SimulationState) {
 		accs[i] = acc.Address.String()
 	}
 	projectbitGenesis := types.GenesisState{
-		Params: types.DefaultParams(),
+		Params:   types.DefaultParams(),
+		PostList: []types.Post{{Id: 0, Creator: sample.AccAddress()}, {Id: 1, Creator: sample.AccAddress()}}, PostCount: 2,
 	}
 	simState.GenState[types.ModuleName] = simState.Cdc.MustMarshalJSON(&projectbitGenesis)
 }
@@ -25,6 +31,52 @@ func (am AppModule) RegisterStoreDecoder(_ simtypes.StoreDecoderRegistry) {}
 // WeightedOperations returns the all the gov module operations with their respective weights.
 func (am AppModule) WeightedOperations(simState module.SimulationState) []simtypes.WeightedOperation {
 	operations := make([]simtypes.WeightedOperation, 0)
+	const (
+		opWeightMsgCreatePost          = "op_weight_msg_projectbit"
+		defaultWeightMsgCreatePost int = 100
+	)
+
+	var weightMsgCreatePost int
+	simState.AppParams.GetOrGenerate(opWeightMsgCreatePost, &weightMsgCreatePost, nil,
+		func(_ *rand.Rand) {
+			weightMsgCreatePost = defaultWeightMsgCreatePost
+		},
+	)
+	operations = append(operations, simulation.NewWeightedOperation(
+		weightMsgCreatePost,
+		projectbitsimulation.SimulateMsgCreatePost(am.authKeeper, am.bankKeeper, am.keeper, simState.TxConfig),
+	))
+	const (
+		opWeightMsgUpdatePost          = "op_weight_msg_projectbit"
+		defaultWeightMsgUpdatePost int = 100
+	)
+
+	var weightMsgUpdatePost int
+	simState.AppParams.GetOrGenerate(opWeightMsgUpdatePost, &weightMsgUpdatePost, nil,
+		func(_ *rand.Rand) {
+			weightMsgUpdatePost = defaultWeightMsgUpdatePost
+		},
+	)
+	operations = append(operations, simulation.NewWeightedOperation(
+		weightMsgUpdatePost,
+		projectbitsimulation.SimulateMsgUpdatePost(am.authKeeper, am.bankKeeper, am.keeper, simState.TxConfig),
+	))
+	const (
+		opWeightMsgDeletePost          = "op_weight_msg_projectbit"
+		defaultWeightMsgDeletePost int = 100
+	)
+
+	var weightMsgDeletePost int
+	simState.AppParams.GetOrGenerate(opWeightMsgDeletePost, &weightMsgDeletePost, nil,
+		func(_ *rand.Rand) {
+			weightMsgDeletePost = defaultWeightMsgDeletePost
+		},
+	)
+	operations = append(operations, simulation.NewWeightedOperation(
+		weightMsgDeletePost,
+		projectbitsimulation.SimulateMsgDeletePost(am.authKeeper, am.bankKeeper, am.keeper, simState.TxConfig),
+	))
+
 	return operations
 }
 
