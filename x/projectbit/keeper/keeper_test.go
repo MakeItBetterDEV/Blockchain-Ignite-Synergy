@@ -4,6 +4,8 @@ import (
 	"context"
 	"testing"
 
+	"cosmossdk.io/math"
+
 	"cosmossdk.io/core/address"
 	storetypes "cosmossdk.io/store/types"
 	addresscodec "github.com/cosmos/cosmos-sdk/codec/address"
@@ -17,6 +19,19 @@ import (
 	module "projectBit/x/projectbit/module"
 	"projectBit/x/projectbit/types"
 )
+
+// Mock bank
+type mockBankKeeper struct{}
+
+// Everyone have infinite money for test
+func (mockBankKeeper) SpendableCoins(ctx context.Context, addr sdk.AccAddress) sdk.Coins {
+	return sdk.NewCoins(sdk.NewCoin("token", math.NewInt(1000000)))
+}
+
+// Send coins without effort (sucess/nil)
+func (mockBankKeeper) SendCoinsFromAccountToModule(ctx context.Context, senderAddr sdk.AccAddress, recipientModule string, amt sdk.Coins) error {
+	return nil
+}
 
 type fixture struct {
 	ctx          context.Context
@@ -36,11 +51,14 @@ func initFixture(t *testing.T) *fixture {
 
 	authority := authtypes.NewModuleAddress(types.GovModuleName)
 
+	bankKeeper := mockBankKeeper{}
+
 	k := keeper.NewKeeper(
 		storeService,
 		encCfg.Codec,
 		addressCodec,
 		authority,
+		bankKeeper,
 	)
 
 	// Initialize params

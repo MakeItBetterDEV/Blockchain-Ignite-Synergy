@@ -16,8 +16,6 @@ faucet:
 client:
     typescript:
         path: ts-client
-    composables:
-        path: vue/src/composables
     openapi:
         path: docs/static/openapi.json
 default_denom: stake

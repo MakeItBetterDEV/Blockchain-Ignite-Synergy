@@ -19,6 +19,9 @@ type Keeper struct {
 	// Typically, this should be the x/gov module account.
 	authority []byte
 
+	// Bank powers
+	bankKeeper types.BankKeeper
+
 	Schema  collections.Schema
 	Params  collections.Item[types.Params]
 	PostSeq collections.Sequence
@@ -30,6 +33,7 @@ func NewKeeper(
 	cdc codec.Codec,
 	addressCodec address.Codec,
 	authority []byte,
+	bankKeeper types.BankKeeper, // Constructor
 
 ) Keeper {
 	if _, err := addressCodec.BytesToString(authority); err != nil {
@@ -43,6 +47,7 @@ func NewKeeper(
 		cdc:          cdc,
 		addressCodec: addressCodec,
 		authority:    authority,
+		bankKeeper:   bankKeeper,
 
 		Params:  collections.NewItem(sb, types.ParamsKey, "params", codec.CollValue[types.Params](cdc)),
 		Post:    collections.NewMap(sb, types.PostKey, "post", collections.Uint64Key, codec.CollValue[types.Post](cdc)),
