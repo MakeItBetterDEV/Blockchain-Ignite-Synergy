@@ -25,6 +25,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/cosmos/cosmos-sdk/x/auth"
+	"github.com/cosmos/cosmos-sdk/x/auth/ante"
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
 	authsims "github.com/cosmos/cosmos-sdk/x/auth/simulation"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
@@ -44,6 +45,7 @@ import (
 	icahostkeeper "github.com/cosmos/ibc-go/v10/modules/apps/27-interchain-accounts/host/keeper"
 	ibctransferkeeper "github.com/cosmos/ibc-go/v10/modules/apps/transfer/keeper"
 	ibckeeper "github.com/cosmos/ibc-go/v10/modules/core/keeper"
+	gnovmmodulekeeper "github.com/ignite/gnovm/x/gnovm/keeper"
 
 	"projectBit/docs"
 	projectbitmodulekeeper "projectBit/x/projectbit/keeper"
@@ -101,6 +103,7 @@ type App struct {
 	// simulation manager
 	sm               *module.SimulationManager
 	ProjectbitKeeper projectbitmodulekeeper.Keeper
+	GnoVMKeeper      gnovmmodulekeeper.Keeper
 }
 
 func init() {
@@ -180,7 +183,7 @@ func New(
 		&app.ConsensusParamsKeeper,
 		&app.CircuitBreakerKeeper,
 		&app.ParamsKeeper,
-		&app.ProjectbitKeeper,
+		&app.ProjectbitKeeper, &app.GnoVMKeeper,
 	); err != nil {
 		panic(err)
 	}
@@ -204,6 +207,14 @@ func New(
 		authtypes.ModuleName: auth.NewAppModule(app.appCodec, app.AuthKeeper, authsims.RandomGenesisAccounts, nil),
 	}
 	app.sm = module.NewSimulationManagerFromAppModules(app.ModuleManager.Modules, overrideModules)
+	if err := app.setAnteHandler(ante.HandlerOptions{
+		AccountKeeper:   app.AuthKeeper,
+		BankKeeper:      app.BankKeeper,
+		SignModeHandler: app.txConfig.SignModeHandler(),
+		SigGasConsumer:  ante.DefaultSigVerificationGasConsumer,
+	}); err != nil {
+		panic(err)
+	}
 
 	app.sm.RegisterStoreDecoders()
 

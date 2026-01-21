@@ -18,7 +18,11 @@ func TestPostMsgServerCreate(t *testing.T) {
 	require.NoError(t, err)
 
 	for i := 0; i < 5; i++ {
-		resp, err := srv.CreatePost(f.ctx, &types.MsgCreatePost{Creator: creator})
+		resp, err := srv.CreatePost(f.ctx, &types.MsgCreatePost{
+			Creator: creator,
+			Title:   "Meu Post de Teste",
+			Body:    "Conteúdo do post",
+		})
 		require.NoError(t, err)
 		require.Equal(t, i, int(resp.Id))
 	}
@@ -34,7 +38,11 @@ func TestPostMsgServerUpdate(t *testing.T) {
 	unauthorizedAddr, err := f.addressCodec.BytesToString([]byte("unauthorizedAddr___________"))
 	require.NoError(t, err)
 
-	_, err = srv.CreatePost(f.ctx, &types.MsgCreatePost{Creator: creator})
+	_, err = srv.CreatePost(f.ctx, &types.MsgCreatePost{
+		Creator: creator,
+		Title:   "Título Inicial",
+		Body:    "Corpo Inicial",
+	})
 	require.NoError(t, err)
 
 	tests := []struct {
@@ -84,7 +92,11 @@ func TestPostMsgServerDelete(t *testing.T) {
 	unauthorizedAddr, err := f.addressCodec.BytesToString([]byte("unauthorizedAddr___________"))
 	require.NoError(t, err)
 
-	_, err = srv.CreatePost(f.ctx, &types.MsgCreatePost{Creator: creator})
+	_, err = srv.CreatePost(f.ctx, &types.MsgCreatePost{
+		Creator: creator,
+		Title:   "Post para Deletar",
+		Body:    "Conteúdo",
+	})
 	require.NoError(t, err)
 
 	tests := []struct {

@@ -1,6 +1,6 @@
 module projectBit
 
-go 1.24.1
+go 1.25.0
 
 replace (
 	// fix upstream GHSA-h395-qcrw-5vmq vulnerability.
@@ -44,6 +44,21 @@ require (
 	google.golang.org/genproto/googleapis/api v0.0.0-20251222181119-0a764e51fe1b
 	google.golang.org/grpc v1.78.0
 	google.golang.org/protobuf v1.36.11
+)
+
+require (
+	github.com/btcsuite/btcd/btcec/v2 v2.3.4 // indirect
+	github.com/btcsuite/btcd/btcutil v1.1.6 // indirect
+	github.com/cockroachdb/apd/v3 v3.2.1 // indirect
+	github.com/gnolang/gno v0.0.0-20250930114629-66df56529bed // indirect
+	github.com/libp2p/go-buffer-pool v0.1.0 // indirect
+	github.com/pelletier/go-toml v1.9.5 // indirect
+	github.com/rs/xid v1.6.0 // indirect
+	github.com/sig-0/insertion-queue v0.0.0-20241004125609-6b3ca841346b // indirect
+	github.com/valyala/bytebufferpool v1.0.0 // indirect
+	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc v1.34.0 // indirect
+	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp v1.34.0 // indirect
+	go.opentelemetry.io/proto/otlp v1.9.0 // indirect
 )
 
 require (
@@ -254,6 +269,7 @@ require (
 	github.com/holiman/uint256 v1.3.2 // indirect
 	github.com/huandu/skiplist v1.2.1 // indirect
 	github.com/iancoleman/strcase v0.3.0 // indirect
+	github.com/ignite/gnovm v0.1.0-alpha.1
 	github.com/improbable-eng/grpc-web v0.15.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jdx/go-netrc v1.0.0 // indirect
@@ -400,7 +416,7 @@ require (
 	go.opentelemetry.io/otel/sdk/metric v1.39.0 // indirect
 	go.opentelemetry.io/otel/trace v1.39.0 // indirect
 	go.uber.org/automaxprocs v1.6.0 // indirect
-	go.uber.org/mock v0.5.2 // indirect
+	go.uber.org/mock v0.6.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.27.1 // indirect
 	go.yaml.in/yaml/v2 v2.4.2 // indirect
@@ -448,3 +464,5 @@ tool (
 	google.golang.org/grpc/cmd/protoc-gen-go-grpc
 	google.golang.org/protobuf/cmd/protoc-gen-go
 )
+
+replace github.com/gnolang/gno => github.com/allinbits/gno v0.0.0-20251027152958-cf2243d301a3

@@ -69,6 +69,8 @@ import (
 	icatypes "github.com/cosmos/ibc-go/v10/modules/apps/27-interchain-accounts/types"
 	ibctransfertypes "github.com/cosmos/ibc-go/v10/modules/apps/transfer/types"
 	ibcexported "github.com/cosmos/ibc-go/v10/modules/core/exported"
+	_ "github.com/ignite/gnovm/x/gnovm/module"
+	gnovmmoduletypes "github.com/ignite/gnovm/x/gnovm/types"
 	"google.golang.org/protobuf/types/known/durationpb"
 )
 
@@ -83,7 +85,7 @@ var (
 		{Account: nft.ModuleName},
 		{Account: ibctransfertypes.ModuleName, Permissions: []string{authtypes.Minter, authtypes.Burner}},
 		{Account: icatypes.ModuleName},
-	}
+		{Account: gnovmmoduletypes.ModuleName, Permissions: []string{authtypes.Minter, authtypes.Burner}}}
 
 	// blocked account addresses
 	blockAccAddrs = []string{
@@ -126,6 +128,7 @@ var (
 						ibcexported.ModuleName,
 						// chain modules
 						projectbitmoduletypes.ModuleName,
+						gnovmmoduletypes.ModuleName,
 						// this line is used by starport scaffolding # stargate/app/beginBlockers
 					},
 					EndBlockers: []string{
@@ -135,6 +138,7 @@ var (
 						group.ModuleName,
 						// chain modules
 						projectbitmoduletypes.ModuleName,
+						gnovmmoduletypes.ModuleName,
 						// this line is used by starport scaffolding # stargate/app/endBlockers
 					},
 					// The following is mostly only needed when ModuleName != StoreKey name.
@@ -172,6 +176,7 @@ var (
 						icatypes.ModuleName,
 						// chain modules
 						projectbitmoduletypes.ModuleName,
+						gnovmmoduletypes.ModuleName,
 						// this line is used by starport scaffolding # stargate/app/initGenesis
 					},
 				}),
@@ -271,6 +276,10 @@ var (
 			{
 				Name:   projectbitmoduletypes.ModuleName,
 				Config: appconfig.WrapAny(&projectbitmoduletypes.Module{}),
+			},
+			{
+				Name:   gnovmmoduletypes.ModuleName,
+				Config: appconfig.WrapAny(&gnovmmoduletypes.Module{}),
 			},
 			// this line is used by starport scaffolding # stargate/app/moduleConfig
 		},
