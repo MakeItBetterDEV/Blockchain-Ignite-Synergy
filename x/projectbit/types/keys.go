@@ -13,6 +13,16 @@ const (
 	// It should be synced with the gov module's name if it is ever changed.
 	// See: https://github.com/cosmos/cosmos-sdk/blob/v0.52.0-beta.2/x/gov/types/keys.go#L9
 	GovModuleName = "gov"
+
+	// Event Types
+    PostCreatedEventType = "post_created"
+    PostUpdatedEventType = "post_updated"
+    PostDeletedEventType = "post_deleted"
+
+	// Attribute Keys
+    PostCreatorAttribute = "creator"
+    PostIdAttribute      = "post_id"
+    PostTitleAttribute   = "title"
 )
 
 // ParamsKey is the prefix to retrieve all Params

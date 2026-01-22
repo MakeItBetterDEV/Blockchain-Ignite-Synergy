@@ -20,7 +20,7 @@ type Keeper struct {
 	authority []byte
 
 	// Bank powers
-	bankKeeper types.BankKeeper
+	BankKeeper types.BankKeeper
 
 	Schema  collections.Schema
 	Params  collections.Item[types.Params]
@@ -47,7 +47,7 @@ func NewKeeper(
 		cdc:          cdc,
 		addressCodec: addressCodec,
 		authority:    authority,
-		bankKeeper:   bankKeeper,
+		BankKeeper:   bankKeeper,
 
 		Params:  collections.NewItem(sb, types.ParamsKey, "params", codec.CollValue[types.Params](cdc)),
 		Post:    collections.NewMap(sb, types.PostKey, "post", collections.Uint64Key, codec.CollValue[types.Post](cdc)),

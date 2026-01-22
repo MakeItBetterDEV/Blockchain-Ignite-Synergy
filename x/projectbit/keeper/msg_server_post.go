@@ -9,17 +9,43 @@ import (
 
 	"cosmossdk.io/collections"
 	errorsmod "cosmossdk.io/errors"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+
+	"strconv" // for convert id to string in events
 )
 
 func (k msgServer) CreatePost(ctx context.Context, msg *types.MsgCreatePost) (*types.MsgCreatePostResponse, error) {
+	// SDK Context
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
 	if len(msg.Title) < 3 {
 		return nil, errorsmod.Wrap(sdkerrors.ErrInvalidRequest, "the title is short")
 	}
 
+	if len(msg.Body) == 0 {
+		return nil, errorsmod.Wrap(sdkerrors.ErrInvalidRequest, "the body is empty")
+	}
+
+	// 1. Address Conversion
+	creatorAddr, err := k.addressCodec.StringToBytes(msg.Creator)
+	if err != nil {
+		return nil, errorsmod.Wrap(sdkerrors.ErrInvalidAddress, fmt.Sprintf("invalid address: %s", err))
+	}
+
+	accAddress := sdk.AccAddress(creatorAddr)
+
 	if _, err := k.addressCodec.StringToBytes(msg.Creator); err != nil {
 		return nil, errorsmod.Wrap(sdkerrors.ErrInvalidAddress, fmt.Sprintf("invalid address: %s", err))
 	}
+
+	// 3. BankKeeper
+    if msg.Amount.IsPositive() {
+        err = k.BankKeeper.SendCoinsFromAccountToModule(ctx, accAddress, types.ModuleName, sdk.NewCoins(msg.Amount))
+        if err != nil {
+            return nil, errorsmod.Wrap(sdkerrors.ErrInsufficientFunds, "failed to pay for post creation")
+        }
+    }
 
 	nextId, err := k.PostSeq.Next(ctx)
 	if err != nil {
@@ -41,12 +67,23 @@ func (k msgServer) CreatePost(ctx context.Context, msg *types.MsgCreatePost) (*t
 		return nil, errorsmod.Wrap(sdkerrors.ErrLogic, "failed to set post")
 	}
 
+	// Emit events
+	sdkCtx.EventManager().EmitEvent(
+        sdk.NewEvent(types.PostCreatedEventType,
+            sdk.NewAttribute(types.PostCreatorAttribute, msg.Creator),
+            sdk.NewAttribute(types.PostIdAttribute, strconv.FormatUint(nextId, 10)),
+            sdk.NewAttribute(types.PostTitleAttribute, msg.Title),
+        ),
+    )
+
 	return &types.MsgCreatePostResponse{
 		Id: nextId,
 	}, nil
 }
 
 func (k msgServer) UpdatePost(ctx context.Context, msg *types.MsgUpdatePost) (*types.MsgUpdatePostResponse, error) {
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
 	if _, err := k.addressCodec.StringToBytes(msg.Creator); err != nil {
 		return nil, errorsmod.Wrap(sdkerrors.ErrInvalidAddress, fmt.Sprintf("invalid address: %s", err))
 	}
@@ -77,10 +114,21 @@ func (k msgServer) UpdatePost(ctx context.Context, msg *types.MsgUpdatePost) (*t
 		return nil, errorsmod.Wrap(sdkerrors.ErrLogic, "failed to update post")
 	}
 
+	// Emit events
+	sdkCtx.EventManager().EmitEvent(
+        sdk.NewEvent(types.PostUpdatedEventType,
+            sdk.NewAttribute(types.PostCreatorAttribute, msg.Creator),
+            sdk.NewAttribute(types.PostIdAttribute, strconv.FormatUint(msg.Id, 10)),
+        ),
+    )
+
 	return &types.MsgUpdatePostResponse{}, nil
 }
 
 func (k msgServer) DeletePost(ctx context.Context, msg *types.MsgDeletePost) (*types.MsgDeletePostResponse, error) {
+
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+
 	if _, err := k.addressCodec.StringToBytes(msg.Creator); err != nil {
 		return nil, errorsmod.Wrap(sdkerrors.ErrInvalidAddress, fmt.Sprintf("invalid address: %s", err))
 	}
@@ -103,6 +151,13 @@ func (k msgServer) DeletePost(ctx context.Context, msg *types.MsgDeletePost) (*t
 	if err := k.Post.Remove(ctx, msg.Id); err != nil {
 		return nil, errorsmod.Wrap(sdkerrors.ErrLogic, "failed to delete post")
 	}
+
+	sdkCtx.EventManager().EmitEvent(
+        sdk.NewEvent(types.PostDeletedEventType,
+            sdk.NewAttribute(types.PostCreatorAttribute, msg.Creator),
+            sdk.NewAttribute(types.PostIdAttribute, strconv.FormatUint(msg.Id, 10)),
+        ),
+    )
 
 	return &types.MsgDeletePostResponse{}, nil
 }
